@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Quebra-Cabeça do Amor</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #fff0f5, #ffe6f0);
+      color: #d10068;
+      text-align: center;
+      padding: 20px;
+      margin: 0;
+    }
+    nav {
+      background-color: #d10068;
+      padding: 10px;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 15px;
+      font-weight: bold;
+    }
+    h1 {
+      font-size: 2.2em;
+      margin-top: 20px;
+    }
+    #puzzle {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+      width: 402px;
+      height: 402px;
+      margin: 30px auto 0;
+      border: 2px solid #d81b60;
+      transition: opacity 0.5s ease;
+    }
+    .tile {
+      width: 133px;
+      height: 133px;
+      background-size: 400px 400px;
+      cursor: pointer;
+      border: 1px solid #fff;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html">Início</a>
+    <a href="quebracabeca.html">Quebra-Cabeça</a>
+  </nav>
+
+  <h1>Monte nossas memórias</h1>
+  <div id="puzzle"></div>
+
+  <script>
+    const puzzle = document.getElementById("puzzle");
+    const positions = [
+      [0,0],[133,0],[266,0],
+      [0,133],[133,133],[266,133],
+      [0,266],[133,266],[266,266]
+    ];
+
+    const images = [
+      "foto1.jpeg", "foto2.jpeg", "foto3.jpeg", "foto4.jpeg", "foto5.jpeg",
+      "foto6.jpeg", "foto7.jpeg", "foto8.jpeg", "foto9.jpeg", "foto10.jpeg"
+    ];
+    let currentImageIndex = 0;
+    let correctOrder = [...Array(9).keys()];
+    let currentOrder = [];
+
+    function createTiles(imageURL) {
+      puzzle.style.opacity = 0;
+      setTimeout(() => {
+        puzzle.innerHTML = "";
+        currentOrder = [...correctOrder].sort(() => Math.random() - 0.5);
+        currentOrder.forEach((index, i) => {
+          const tile = document.createElement("div");
+          tile.className = "tile";
+          tile.style.backgroundImage = `url('${imageURL}')`;
+          tile.style.backgroundPosition = `-${positions[index][0]}px -${positions[index][1]}px`;
+          tile.dataset.index = i;
+          tile.addEventListener("click", () => moveTile(i));
+          puzzle.appendChild(tile);
+        });
+        puzzle.style.opacity = 1;
+      }, 400);
+    }
+
+    function moveTile(i) {
+      if (i < currentOrder.length - 1) {
+        [currentOrder[i], currentOrder[i+1]] = [currentOrder[i+1], currentOrder[i]];
+        updateTiles();
+        checkWin();
+      }
+    }
+
+    function updateTiles() {
+      [...puzzle.children].forEach((tile, i) => {
+        const index = currentOrder[i];
+        tile.style.backgroundPosition = `-${positions[index][0]}px -${positions[index][1]}px`;
+      });
+    }
+
+    function checkWin() {
+      if (currentOrder.every((val, i) => val === correctOrder[i])) {
+        currentImageIndex++;
+        if (currentImageIndex < images.length) {
+          createTiles(images[currentImageIndex]);
+        } else {
+          puzzle.innerHTML = "<h2 style='color:#4a148c;'>Você completou todas as memórias! ❤</h2>";
+        }
+      }
+    }
+
+    createTiles(images[currentImageIndex]);
+  </script>
+</body>
+</html>
