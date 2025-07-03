@@ -45,6 +45,20 @@
       border: 1px solid #fff;
       box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
+    #nextBtn {
+      margin-top: 20px;
+      padding: 12px 25px;
+      font-size: 16px;
+      background-color: #d10068;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      display: none;
+    }
+    #nextBtn:hover {
+      background-color: #ad0054;
+    }
   </style>
 </head>
 <body>
@@ -55,10 +69,14 @@
   </nav>
 
   <h1>Monte nossas memórias</h1>
+
   <div id="puzzle"></div>
+  <button id="nextBtn" onclick="nextPuzzle()">Próxima memória ❤️</button>
 
   <script>
     const puzzle = document.getElementById("puzzle");
+    const nextBtn = document.getElementById("nextBtn");
+
     const positions = [
       [0,0],[133,0],[266,0],
       [0,133],[133,133],[266,133],
@@ -69,12 +87,14 @@
       "foto1.jpeg", "foto2.jpeg", "foto3.jpeg", "foto4.jpeg", "foto5.jpeg",
       "foto6.jpeg", "foto7.jpeg", "foto8.jpeg", "foto9.jpeg", "foto10.jpeg"
     ];
+
     let currentImageIndex = 0;
     let correctOrder = [...Array(9).keys()];
     let currentOrder = [];
 
     function createTiles(imageURL) {
       puzzle.style.opacity = 0;
+      nextBtn.style.display = "none";
       setTimeout(() => {
         puzzle.innerHTML = "";
         currentOrder = [...correctOrder].sort(() => Math.random() - 0.5);
@@ -108,12 +128,17 @@
 
     function checkWin() {
       if (currentOrder.every((val, i) => val === correctOrder[i])) {
-        currentImageIndex++;
-        if (currentImageIndex < images.length) {
-          createTiles(images[currentImageIndex]);
-        } else {
-          puzzle.innerHTML = "<h2 style='color:#4a148c;'>Você completou todas as memórias! ❤</h2>";
-        }
+        nextBtn.style.display = "inline-block";
+      }
+    }
+
+    function nextPuzzle() {
+      currentImageIndex++;
+      if (currentImageIndex < images.length) {
+        createTiles(images[currentImageIndex]);
+      } else {
+        puzzle.innerHTML = "<h2 style='color:#4a148c;'>Você completou todas as memórias! ❤️</h2>";
+        nextBtn.style.display = "none";
       }
     }
 
