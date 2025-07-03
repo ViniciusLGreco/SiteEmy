@@ -36,8 +36,9 @@
     #puzzle {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
-      width: 90vw;
-      height: 90vw;
+      grid-template-rows: repeat(3, 1fr);
+      width: 300px;
+      height: 300px;
       margin: 20px auto;
       gap: 2px;
       border: 3px solid #d10068;
@@ -46,10 +47,10 @@
     .tile {
       width: 100%;
       height: 100%;
-      background-size: 270% 270%;
+      background-size: 300px 300px;
       background-repeat: no-repeat;
-      box-shadow: 0 0 3px rgba(0,0,0,0.2);
       cursor: pointer;
+      box-shadow: 0 0 2px rgba(0,0,0,0.2);
     }
 
     #nextBtn {
@@ -64,10 +65,14 @@
       display: none;
     }
 
-    @media (min-width: 768px) {
+    @media (max-width: 360px) {
       #puzzle {
-        width: 402px;
-        height: 402px;
+        width: 270px;
+        height: 270px;
+      }
+
+      .tile {
+        background-size: 270px 270px;
       }
     }
   </style>
@@ -88,28 +93,31 @@
     const puzzle = document.getElementById("puzzle");
     const btn = document.getElementById("nextBtn");
     const size = 3;
-    const tileCount = size * size;
+    const total = size * size;
     const images = [
-      "foto1.jpeg", "foto2.jpeg", "foto3.jpeg", "foto4.jpeg", "foto5.jpeg",
-      "foto6.jpeg", "foto7.jpeg", "foto8.jpeg", "foto9.jpeg", "foto10.jpeg"
+      "foto1.jpeg", "foto2.jpeg", "foto3.jpeg", "foto4.jpeg",
+      "foto5.jpeg", "foto6.jpeg", "foto7.jpeg", "foto8.jpeg",
+      "foto9.jpeg", "foto10.jpeg"
     ];
-
     let currentImageIndex = 0;
     let tiles = [];
 
-    function loadPuzzle(image) {
+    function loadPuzzle(image, tileSize = 100) {
       puzzle.innerHTML = "";
-      tiles = Array.from({ length: tileCount }, (_, i) => i);
+      tiles = Array.from({ length: total }, (_, i) => i);
       tiles = shuffle(tiles);
 
-      tiles.forEach((tileIndex, i) => {
+      tiles.forEach((val, i) => {
         const tile = document.createElement("div");
         tile.className = "tile";
         tile.dataset.index = i;
-        const x = tileIndex % size;
-        const y = Math.floor(tileIndex / size);
+
+        const x = val % size;
+        const y = Math.floor(val / size);
+
         tile.style.backgroundImage = `url('${image}')`;
-        tile.style.backgroundPosition = `${-x * 100}% ${-y * 100}%`;
+        tile.style.backgroundPosition = `-${x * tileSize}px -${y * tileSize}px`;
+
         tile.addEventListener("click", () => moveTile(i));
         puzzle.appendChild(tile);
       });
@@ -126,16 +134,17 @@
     }
 
     function updateTiles() {
+      const tileSize = puzzle.offsetWidth / size;
       [...puzzle.children].forEach((tile, i) => {
-        const tileIndex = tiles[i];
-        const x = tileIndex % size;
-        const y = Math.floor(tileIndex / size);
-        tile.style.backgroundPosition = `${-x * 100}% ${-y * 100}%`;
+        const val = tiles[i];
+        const x = val % size;
+        const y = Math.floor(val / size);
+        tile.style.backgroundPosition = `-${x * tileSize}px -${y * tileSize}px`;
       });
     }
 
     function checkWin() {
-      if (tiles.every((val, idx) => val === idx)) {
+      if (tiles.every((val, i) => val === i)) {
         btn.style.display = "inline-block";
       }
     }
