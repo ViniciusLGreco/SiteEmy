@@ -9,9 +9,9 @@
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(to right, #fff0f5, #ffe6f0);
       color: #d10068;
-      text-align: center;
-      padding: 0;
       margin: 0;
+      padding: 0;
+      text-align: center;
     }
 
     nav {
@@ -20,75 +20,60 @@
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
-      gap: 15px;
     }
 
     nav a {
       color: white;
       text-decoration: none;
+      margin: 5px 15px;
       font-weight: bold;
-      font-size: 15px;
     }
 
     h1 {
-      font-size: 2em;
-      margin: 20px 10px;
+      margin-top: 20px;
     }
 
     #puzzle {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
+      width: 90vw;
+      height: 90vw;
+      margin: 20px auto;
       gap: 2px;
-      width: 100%;
-      max-width: 402px;
-      aspect-ratio: 1 / 1;
-      margin: 0 auto;
-      border: 2px solid #d81b60;
-      transition: opacity 0.5s ease;
+      border: 3px solid #d10068;
     }
 
     .tile {
       width: 100%;
       height: 100%;
-      background-size: 100% 100%;
+      background-size: 270% 270%;
+      background-repeat: no-repeat;
+      box-shadow: 0 0 3px rgba(0,0,0,0.2);
       cursor: pointer;
-      border: 1px solid #fff;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
     }
 
     #nextBtn {
-      margin: 20px auto;
-      padding: 12px 25px;
-      font-size: 16px;
+      margin-top: 20px;
       background-color: #d10068;
       color: white;
+      padding: 12px 24px;
+      font-size: 1em;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
       cursor: pointer;
       display: none;
     }
 
-    #nextBtn:hover {
-      background-color: #ad0054;
-    }
-
-    @media (max-width: 480px) {
-      nav a {
-        font-size: 14px;
-      }
-
-      h1 {
-        font-size: 1.6em;
-      }
-
-      #nextBtn {
-        font-size: 14px;
-        padding: 10px 20px;
+    @media (min-width: 768px) {
+      #puzzle {
+        width: 402px;
+        height: 402px;
       }
     }
   </style>
 </head>
 <body>
+
   <nav>
     <a href="index.html">Início</a>
     <a href="timeline.html">Linha do Tempo</a>
@@ -97,57 +82,44 @@
 
   <h1>Monte nossas memórias</h1>
   <div id="puzzle"></div>
-  <button id="nextBtn" onclick="nextPuzzle()">Próxima memória 💖</button>
+  <button id="nextBtn">Próxima memória 💖</button>
 
   <script>
     const puzzle = document.getElementById("puzzle");
-    const nextBtn = document.getElementById("nextBtn");
-
-      const positions = [
-      [0,0],[133,0],[266,0],
-      [0,133],[133,133],[266,133],
-      [0,266],[133,266],[266,266]
-    ];
-
+    const btn = document.getElementById("nextBtn");
+    const size = 3;
+    const tileCount = size * size;
     const images = [
       "foto1.jpeg", "foto2.jpeg", "foto3.jpeg", "foto4.jpeg", "foto5.jpeg",
       "foto6.jpeg", "foto7.jpeg", "foto8.jpeg", "foto9.jpeg", "foto10.jpeg"
     ];
 
     let currentImageIndex = 0;
-    const correctOrder = [...Array(9).keys()];
-    let currentOrder = [];
+    let tiles = [];
 
-    function createTiles(imageURL) {
-      puzzle.style.opacity = 0;
-      nextBtn.style.display = "none";
+    function loadPuzzle(image) {
+      puzzle.innerHTML = "";
+      tiles = Array.from({ length: tileCount }, (_, i) => i);
+      tiles = shuffle(tiles);
 
-      setTimeout(() => {
-        puzzle.innerHTML = "";
-        currentOrder = [...correctOrder].sort(() => Math.random() - 0.5);
+      tiles.forEach((tileIndex, i) => {
+        const tile = document.createElement("div");
+        tile.className = "tile";
+        tile.dataset.index = i;
+        const x = tileIndex % size;
+        const y = Math.floor(tileIndex / size);
+        tile.style.backgroundImage = `url('${image}')`;
+        tile.style.backgroundPosition = `${-x * 100}% ${-y * 100}%`;
+        tile.addEventListener("click", () => moveTile(i));
+        puzzle.appendChild(tile);
+      });
 
-        currentOrder.forEach((index, i) => {
-          const tile = document.createElement("div");
-          tile.className = "tile";
-          tile.style.backgroundImage = `url('${imageURL}')`;
-
-          // calcula posição de fundo com base na posição da peça
-          const x = (index % 3) * 33.333;
-          const y = Math.floor(index / 3) * 33.333;
-          tile.style.backgroundPosition = `-${x}% -${y}%`;
-
-          tile.dataset.index = i;
-          tile.addEventListener("click", () => moveTile(i));
-          puzzle.appendChild(tile);
-        });
-
-        puzzle.style.opacity = 1;
-      }, 400);
+      btn.style.display = "none";
     }
 
     function moveTile(i) {
-      if (i < currentOrder.length - 1) {
-        [currentOrder[i], currentOrder[i + 1]] = [currentOrder[i + 1], currentOrder[i]];
+      if (i < tiles.length - 1) {
+        [tiles[i], tiles[i + 1]] = [tiles[i + 1], tiles[i]];
         updateTiles();
         checkWin();
       }
@@ -155,30 +127,41 @@
 
     function updateTiles() {
       [...puzzle.children].forEach((tile, i) => {
-        const index = currentOrder[i];
-        const x = (index % 3) * 33.333;
-        const y = Math.floor(index / 3) * 33.333;
-        tile.style.backgroundPosition = `-${x}% -${y}%`;
+        const tileIndex = tiles[i];
+        const x = tileIndex % size;
+        const y = Math.floor(tileIndex / size);
+        tile.style.backgroundPosition = `${-x * 100}% ${-y * 100}%`;
       });
     }
 
     function checkWin() {
-      if (currentOrder.every((val, i) => val === correctOrder[i])) {
-        nextBtn.style.display = "inline-block";
+      if (tiles.every((val, idx) => val === idx)) {
+        btn.style.display = "inline-block";
       }
     }
 
-    function nextPuzzle() {
+    function shuffle(array) {
+      let currentIndex = array.length, randomIndex;
+      while (currentIndex !== 0) {
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex--;
+        [array[currentIndex], array[randomIndex]] = [
+          array[randomIndex], array[currentIndex]];
+      }
+      return array;
+    }
+
+    btn.addEventListener("click", () => {
       currentImageIndex++;
       if (currentImageIndex < images.length) {
-        createTiles(images[currentImageIndex]);
+        loadPuzzle(images[currentImageIndex]);
       } else {
-        puzzle.innerHTML = "<h2 style='color:#4a148c;'>Você completou todas as memórias! ❤️</h2>";
-        nextBtn.style.display = "none";
+        puzzle.innerHTML = "<h2 style='color:#4a148c;'>Você completou todas as memórias! ❤</h2>";
+        btn.style.display = "none";
       }
-    }
+    });
 
-    createTiles(images[currentImageIndex]);
+    loadPuzzle(images[currentImageIndex]);
   </script>
 </body>
 </html>
